@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Project 4</title>
+    <link rel="stylesheet" href="main.css">
+
+</head>
+
+<body>
+    <!--Navbar-->
+    <div>
+        <h2>My News <i id="myBtn" class="fa fa-search" style="font-size:30px"></i></h2>
+    </div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Nội dung form đăng nhập -->
+        <div class="modal-content">
+            <form onsubmit="return searchKeyword()">
+                <span class="close">&times;</span>
+                <h3 style="text-align: center;">Search News</h3>
+                <div class="fomrgroup">
+                    <b>Keyword</b><input type="text" autocomplete="off" name="keywords" id="myInput" required>
+                </div>
+                <div class="fomrgroup" style="text-align: center">
+                    <button type="submit" style="background-color: rgb(31, 31, 158); color: white;">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!--Phần Main-->
+    <div id="search_list"></div>
+    <div id="loader"></div>
+
+    <script>
+        function showLoading() {
+            document.getElementById("loader").style.display = 'block'
+        }
+
+        function hideLoading() {
+            document.getElementById("loader").style.display = 'none'
+        }
+        /*Tình huống 1 - Lấy tin tức hàng đầu*/
+        const key = "https://gnews.io/api/v4/top-headlines?token=bcd54a2b0a58b536f0bb241c7c10d199&lang=en";
+        showLoading() //Hiển thị biểu tượng loading trong quá trình tải dữ liệu từ API về
+        fetch(key)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                var myArray = data.articles;
+                var topHead = "";
+
+                for (var i = 0; i < myArray.length; i++) {
+                    var myTitle = myArray[i].title;
+                    var myDes = myArray[i].description;
+                    var myLink = myArray[i].url;
+                    var myImg = myArray[i].image;
+                    var myDate = myArray[i].publishedAt;
+                    topHead += `<div class="top">`;
+                    topHead += `<img class="col-3" src="${myImg}">`;
+                    topHead += `<div class="row col-9"><h3><a href="${myLink}" target="_blank">${myTitle}</a></h3>`;
+                    topHead += `<p>${myDate}</p>`;
+                    topHead += `<p>${myDes}</p><br>`;
+                    topHead += `</div></div>`;
+                }
+                document.getElementById("search_list").innerHTML = topHead;
+                hideLoading(); //Đóng biểu tượng loading khi dữ liệu đã tải xong
+            });
+
+
+        /*Tình huống 2 - Lấy tin tức theo từ khóa*/
+        // lấy phần Modal
+        var modal = document.getElementById("myModal");
+
+        // Lấy phần button mở Modal
+        var btn = document.getElementById("myBtn");
+
+        // Lấy phần span đóng Modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // Khi button được click thi mở Modal
+        btn.onclick = function() {
+            modal.style.display = "block";
+        };
+
+        // Khi span được click thì đóng Modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+
+        // Khi click ngoài Modal thì đóng Modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+        //Lấy dữ liệu khi người dùng search
+        function searchKeyword() {
+            showLoading(); //Hiển thị biểu tượng loading trong quá trình tải dữ liệu từ API về
+            const input = document.getElementById("myInput").value;
+            fetch(`https://gnews.io/api/v4/search?q=${input}&token=bcd54a2b0a58b536f0bb241c7c10d199&lang=en&limit=5`)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    var myArray = data.articles;
+                    var html = "";
+                    for (var i = 0; i < myArray.length; i++) {
+                        var myTitle = myArray[i].title;
+                        var myDes = myArray[i].description;
+                        var myLink = myArray[i].url;
+                        var myImg = myArray[i].image;
+                        var myDate = myArray[i].publishedAt;
+                        html += `<div class="top">`;
+                        html += `<img class="col-3" src="${myImg}">`;
+                        html += `<div class="row col-9"><h3><a href="${myLink}" target="_blank">${myTitle}</a></h3>`;
+                        html += `<p>${myDate}</p>`;
+                        html += `<p>${myDes}</p><br>`;
+                        html += `</div></div>`;
+                    }
+                    let myNode = document.getElementById("search_list");
+                    // while (myNode.firstChild) {
+                    //   myNode.removeChild(myNode.firstChild);
+                    // }
+                    // myNode.innerHTML = ""
+                    myNode.innerHTML = html;
+                    hideLoading(); //Đóng biểu tượng loading khi dữ liệu đã tải xong
+                });
+            return false;
+        };
+    </script>
+</body>
+
+</html>
